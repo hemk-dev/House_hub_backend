@@ -1,0 +1,68 @@
+### Get all users
+GET http://localhost:5000/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmbmFtZSI6IlRlc3QiLCJlbWFpbCI6InlvbW9iZTYxNjdAZGVnY29zLmNvbSIsInJvbGVJZCI6MywiaWF0IjoxNzI2NDAzMjY1LCJleHAiOjE3MjY0ODk2NjV9.PJSWvO5NAfPFuEBmGtlhRh1fj_Xsiwe8060YyNm15Uk
+### Register a new user
+POST http://localhost:5000/user/register
+Content-Type: application/json
+
+{
+  "fname": "Test",
+  "lname": "User",
+  "email": "hem@itoneclick.com",
+  "password": "Test@123",
+  "phone": "9989812412",
+  "role_id": 1
+}
+
+### Login a user
+POST http://localhost:5000/user/login
+Content-Type: application/json
+
+{
+  "email": "yomobe6167@degcos.com",
+  "password": "Hem@1234"
+}
+
+# {
+#   "email": "yomobe6167@degcos.com",
+#   "password": "Hem@1234"
+# }
+
+# {
+#   "email": "hem@itoneclick.com",
+#   "password": "Test@123"
+# }
+
+
+
+### Forget Password
+POST http://localhost:5000/user/forget-password
+Content-Type: application/json
+
+{
+  "email": "yomobe6167@degcos.com"
+}
+
+### Verify OTP
+POST http://localhost:5000/user/verify-otp
+Content-Type: application/json
+
+{
+  "email": "yomobe6167@degcos.com",
+  "otp": "277517"
+}
+
+### Reset Password
+POST http://localhost:5000/user/reset-password
+Content-Type: application/json
+
+{
+  "email": "yomobe6167@degcos.com",
+  "password": "Hem@1234"
+}
+
+
+# {
+#   "email": "yomobe6167@degcos.com",
+#   "password": "Hem@1234"
+# }
