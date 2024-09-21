@@ -1,20 +1,29 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserResponse } from 'src/shared/interfaces/createUser.interface';
 import { ForgetPasswordDto } from './dto/forgetPassword.dto';
 import { VerifyOtpDto } from './dto/verifyOtp.dto';
 import { loginUserDto } from './dto/loginUser.dto';
-import { RolesGuard } from './Guards/roles.guard';
+import { listUserResponse } from 'src/shared/interfaces/listUser.interface';
+import { AuthGuard } from './guards/auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 import { UserRole } from 'src/shared/enums/user-roles.enum';
 import { Roles } from './decorators/roles.decorator';
-import { listUserResponse } from 'src/shared/interfaces/listUser.interface';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(RolesGuard)
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles(UserRole.ADMIN, UserRole.OWNER)
+  // @Get('status')
+  // status(@Request() request) {
+  //   console.log('Inside AuthController status method', request.user);
+  //   return 'req.user';
+  // }
+
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
   async getUsers(): Promise<listUserResponse> {
@@ -47,7 +56,7 @@ export class UserController {
     return this.userService.verifyOtp(verifyOtpDto);
   }
 
-  @Post('reset-password')
+  @Put('reset-password')
   async resetPassword(
     @Body() resetPasswordDto: loginUserDto,
   ): Promise<{ message: string }> {

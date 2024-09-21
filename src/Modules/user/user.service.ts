@@ -14,7 +14,6 @@ import { CreateUserResponse } from 'src/shared/interfaces/createUser.interface';
 import { ErrorResponseUtility } from 'src/shared/utils/error-response.utility';
 import { CryptoUtility } from 'src/shared/utils/crypto.utility';
 import { loginUserDto } from './dto/loginUser.dto';
-import { loginUserResponse } from 'src/shared/interfaces/loginUser.interface';
 import { ForgetPasswordDto } from './dto/forgetPassword.dto';
 import { passwordResetEmailTemplate } from 'src/shared/email/reset-password-template';
 import { MailService } from 'src/shared/utils/mail-service.utility';
@@ -23,6 +22,7 @@ import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
 import { ChangedPasswordEmailTemplate } from 'src/shared/email/password-changed-template';
 import { listUserResponse } from 'src/shared/interfaces/listUser.interface';
+import { loginUserResponse } from 'src/shared/interfaces/loginUser.interface';
 
 @Injectable()
 export class UserService {
@@ -104,15 +104,19 @@ export class UserService {
         throw new UnauthorizedException('Invalid credentials!');
       }
       const payload = {
+        userId: user.userId,
         fname: user.firstName,
+        lname: user.lastName,
         email: email,
         roleId: user.roleId,
       };
-      const token = this.jwtService.sign(payload, {
-        expiresIn: '24h',
-      });
+      const token = await this.jwtService.signAsync(payload);
       delete user.password;
       delete user.roleId;
+      delete user.otp;
+      delete user.otpUsed;
+      delete user.createdAt;
+      delete user.updatedAt;
 
       return { user, token };
     } catch (error) {

@@ -1,6 +1,8 @@
 ### Get all users
 GET http://localhost:5000/user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmbmFtZSI6IlRlc3QiLCJlbWFpbCI6InlvbW9iZTYxNjdAZGVnY29zLmNvbSIsInJvbGVJZCI6MywiaWF0IjoxNzI2NDAzMjY1LCJleHAiOjE3MjY0ODk2NjV9.PJSWvO5NAfPFuEBmGtlhRh1fj_Xsiwe8060YyNm15Uk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhODliZDY2Mi1hMmJjLTQ4M2QtOTNkNi02ZGVhMjg3NDAzMDgiLCJmbmFtZSI6IlRlc3QiLCJlbWFpbCI6ImhlbUBpdG9uZWNsaWNrLmNvbSIsInJvbGVJZCI6MSwiaWF0IjoxNzI2OTAwNzQwfQ.E3CLOIuU_kg-8__cVANUlOb86cAzN_1wQ6PDJI7KmJU
+
+
 ### Register a new user
 POST http://localhost:5000/user/register
 Content-Type: application/json
@@ -8,10 +10,10 @@ Content-Type: application/json
 {
   "fname": "Test",
   "lname": "User",
-  "email": "hem@itoneclick.com",
+  "email": "hem1@itoneclick.com",
   "password": "Test@123",
   "phone": "9989812412",
-  "role_id": 1
+  "role_id": 3
 }
 
 ### Login a user
@@ -19,8 +21,8 @@ POST http://localhost:5000/user/login
 Content-Type: application/json
 
 {
-  "email": "yomobe6167@degcos.com",
-  "password": "Hem@1234"
+  "email": "hem1@itoneclick.com",
+  "password": "Test@123"
 }
 
 # {
@@ -28,10 +30,7 @@ Content-Type: application/json
 #   "password": "Hem@1234"
 # }
 
-# {
-#   "email": "hem@itoneclick.com",
-#   "password": "Test@123"
-# }
+
 
 
 
@@ -66,3 +65,32 @@ Content-Type: application/json
 #   "email": "yomobe6167@degcos.com",
 #   "password": "Hem@1234"
 # }
+###\
+
+POST http://localhost:5000/properties/register
+Content-Type: application/json
+
+{
+  "name": "Luxury Apartment",
+  "type": "Apartment",
+  "availability_status": 1,
+  "security_deposit": "1500.00",
+  "rent": "2500.00",
+  "contact": "+1234567890",
+  "country": "USA",
+  "state": "California",
+  "city": "Los Angeles",
+  "address": "123 Sunset Boulevard",
+  "zipcode": "90001",
+  "email": "johndoe@example.com",
+  "carpet_area": "1200",
+  "status": 1,
+  "furnishing": 2,
+  "photos": [
+    "http://example.com/photo1.jpg",
+    "http://example.com/photo2.jpg"
+  ],
+  "BHK": 2,
+  "age_of_construction": 5,
+  "description": "A luxurious apartment located in the heart of Los Angeles with modern amenities."
+}

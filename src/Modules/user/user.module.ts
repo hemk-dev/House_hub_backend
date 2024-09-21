@@ -1,30 +1,17 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-
+import { ConfigModule } from '@nestjs/config';
+// import { RolesGuard } from './Guards/roles.guard';
 import { UserService } from './user.service';
-import { UserController } from './user.controller';
+import { MailService } from 'src/shared/utils/mail-service.utility';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/shared/entities/User.entity';
 import { CryptoUtility } from 'src/shared/utils/crypto.utility';
-import { MailService } from 'src/shared/utils/mail-service.utility';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { RolesGuard } from './Guards/roles.guard';
-
+import { UserController } from './user.controller';
+import { AuthGuard } from './guards/auth.guard';
 @Module({
-  imports: [
-    ConfigModule,
-    TypeOrmModule.forFeature([User]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '24h' },
-      }),
-    }),
-  ],
-  providers: [UserService, CryptoUtility, MailService, JwtStrategy, RolesGuard],
+  imports: [ConfigModule, TypeOrmModule.forFeature([User])],
   controllers: [UserController],
+  providers: [UserService, CryptoUtility, MailService, AuthGuard],
+  exports: [AuthGuard],
 })
 export class UserModule {}

@@ -9,8 +9,12 @@ import {
 } from '@nestjs/common';
 
 export class ErrorResponseUtility {
-  static handleApiResponseError(error) {
-    if (typeof error.response !== 'undefined') {
+  static handleApiResponseError(error: any) {
+    if (error instanceof BadRequestException) {
+      throw new BadRequestException('Invalid data provided');
+    }
+
+    if (typeof error.response != 'undefined') {
       switch (error.response.statusCode) {
         case 401:
           throw new UnauthorizedException(error.response.message);

@@ -4,13 +4,15 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { UserRole } from '../enums/user-roles.enum';
+import { Property } from './Property.entity';
 
-@Entity('user-demo')
+@Entity('user')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  user_id: string;
+  @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
+  userId: string;
 
   @Column('character varying', {
     name: 'first_name',
@@ -58,4 +60,7 @@ export class User {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
+
+  @OneToMany(() => Property, (property) => property.user)
+  property: Property[];
 }

@@ -1,53 +1,34 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  UnauthorizedException,
+  Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
-import { ROLES_KEY } from '../decorators/roles.decorator';
 import { UserRole } from 'src/shared/enums/user-roles.enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
-      ROLES_KEY,
-      [context.getHandler(), context.getClass()],
-    );
-
-    if (!requiredRoles) {
+    const roles = this.reflector.get<UserRole[]>('roles', context.getHandler());
+    if (!roles) {
       return true;
     }
 
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
+    const user = request.user;
 
-    if (!authHeader) {
-      throw new UnauthorizedException('No token found');
+    if (!user || !user.roleId) {
+      throw new ForbiddenException('Access Denied!');
     }
 
-    try {
-      const token = authHeader.split(' ')[1];
-      const user = this.jwtService.verify(token);
-
-      if (!requiredRoles.includes(user.roleId)) {
-        throw new ForbiddenException('Permission Denied');
-      }
-
-      return true;
-    } catch (error) {
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new UnauthorizedException('Invalid token');
+    const hasRole = roles.includes(user.roleId);
+    if (!hasRole) {
+      throw new ForbiddenException('Permission Denied!');
     }
+
+    return true;
   }
 }
