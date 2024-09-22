@@ -62,4 +62,8 @@ export class ListPropertiesDto {
   @IsOptional()
   @IsString()
   sortOrder?: 'ASC' | 'DESC';
+
+  @IsOptional()
+  @IsString()
+  keyword?: string;
 }

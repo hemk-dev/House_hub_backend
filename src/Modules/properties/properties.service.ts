@@ -24,6 +24,13 @@ export class PropertiesService {
     try {
       const query = this.propertyRepository.createQueryBuilder('property');
 
+      if (listPropertiesFilter?.keyword) {
+        query.andWhere(
+          'property.property_name ilike :keyword OR property.city ilike :keyword OR property.state ilike :keyword',
+          { keyword: listPropertiesFilter?.keyword.toLowerCase() },
+        );
+      }
+
       if (listPropertiesFilter?.city) {
         query.andWhere('property.city ilike :city', {
           city: listPropertiesFilter?.city.toLowerCase(),
