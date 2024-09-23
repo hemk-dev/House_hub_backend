@@ -22,12 +22,12 @@ export const typeormConfig: TypeOrmModuleAsyncOptions = {
       synchronize: true,
       //uncomment this ssl, extra for NEON tech
       //comment in local
-      // ssl: {
-      //   rejectUnauthorized: false, // This disables certificate validation for SSL
-      // },
-      // extra: {
-      //   sslmode: 'require', // Ensures that SSL is used for the connection
-      // },
+      ssl: {
+        rejectUnauthorized: false, // This disables certificate validation for SSL
+      },
+      extra: {
+        sslmode: 'require', // Ensures that SSL is used for the connection
+      },
     };
   },
 };
