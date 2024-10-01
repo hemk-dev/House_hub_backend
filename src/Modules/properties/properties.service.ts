@@ -9,6 +9,7 @@ import { CryptoUtility } from 'src/shared/utils/crypto.utility';
 import { User } from 'src/shared/entities/User.entity';
 import { UpdatePropertyDto } from './dto/updateProperty.dto';
 import { ListPropertiesDto } from './dto/ListProperties.dto';
+import { UserRole } from 'src/shared/enums/user-roles.enum';
 
 @Injectable()
 export class PropertiesService {
@@ -17,6 +18,40 @@ export class PropertiesService {
     private propertyRepository: Repository<Property>,
     private cryptoUtility: CryptoUtility,
   ) {}
+
+  async getFilters(): Promise<any> {
+    try {
+      const query = this.propertyRepository.createQueryBuilder('property');
+
+      const ownerName = await query
+        .distinct(true)
+        .select('property.owner_name')
+        .getRawMany();
+      const city = await query
+        .distinct(true)
+        .select('property.city')
+        .getRawMany();
+      const state = await query
+        .distinct(true)
+        .select('property.state')
+        .getRawMany();
+      const country = await query
+        .distinct(true)
+        .select('property.country')
+        .getRawMany();
+
+      const filters = {
+        owner_name: ownerName.map((o) => o.property_owner_name),
+        city: city.map((c) => c.property_city),
+        state: state.map((s) => s.property_state),
+        country: country.map((s) => s.property_country),
+      };
+
+      return filters;
+    } catch (error) {
+      ErrorResponseUtility.handleApiResponseError(error);
+    }
+  }
 
   async listProperties(
     listPropertiesFilter: ListPropertiesDto,
@@ -146,6 +181,7 @@ export class PropertiesService {
   async registerProperty(
     registerPropertyDto: RegisterPropertyDto,
     user: any,
+    imageFilename: string, // Accept the image filename as a parameter
   ): Promise<RegisterPropertyInterface> {
     try {
       const encryptedEmail = await this.cryptoUtility.encode(user.email);
@@ -153,12 +189,13 @@ export class PropertiesService {
         ...registerPropertyDto,
         userId: user.userId,
         email: encryptedEmail,
-        owner_name: user.fname + ' ' + user.lname,
+        owner_name: `${user.fname} ${user.lname}`,
+        photos: imageFilename ? [imageFilename] : [], // Add the image filename to the 'photos' field
       });
       await this.propertyRepository.save(property);
       return {
         property: property,
-        message: 'Property Registered successfully ',
+        message: 'Property Registered successfully',
       };
     } catch (error) {
       console.log('error', error);
@@ -166,17 +203,30 @@ export class PropertiesService {
     }
   }
 
-  async getPropertyByOwner(user: User): Promise<Property[]> {
+  async getPropertyByOwner(): Promise<any> {
     try {
-      const encryptedEmail = await this.cryptoUtility.encode(user.email);
-      const properties = await this.propertyRepository.find({
-        where: [{ email: encryptedEmail }, { userId: user.userId }],
-      });
-      if (!properties) {
-        throw new NotFoundException('Property Not Found');
+    } catch (error) {}
+  }
+
+  async getPropertyDashboard(user: User): Promise<Property[]> {
+    try {
+      let properties: Property[];
+      if (user.roleId === UserRole.OWNER) {
+        const encryptedEmail = await this.cryptoUtility.encode(user.email);
+        properties = await this.propertyRepository.find({
+          where: [{ email: encryptedEmail }, { userId: user.userId }],
+        });
+      } else {
+        properties = await this.propertyRepository.find();
       }
+
+      if (!properties || properties.length === 0) {
+        throw new NotFoundException('Properties Not Found');
+      }
+
       return properties;
     } catch (error) {
+      console.log(error);
       ErrorResponseUtility.handleApiResponseError(error);
     }
   }

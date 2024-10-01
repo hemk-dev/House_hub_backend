@@ -1,15 +1,18 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { AvailabilityStatus } from '../enums/property-availability-status.enum';
 import { PropertyStatus } from '../enums/property-status.enum';
 import { FurnishingStatus } from '../enums/furnishing-status.enum';
 import { BHKStatus } from '../enums/bhk-type.enum';
 import { User } from './User.entity';
+import { tenantPreferred } from '../enums/tenant-preferred.enum';
 
 @Entity('properties')
 export class Property {
@@ -89,6 +92,16 @@ export class Property {
   })
   BHK: BHKStatus;
 
+  @Column({
+    type: 'enum',
+    enum: tenantPreferred,
+    default: tenantPreferred.Both,
+  })
+  tenantPreferred: tenantPreferred;
+
+  @Column('int', { name: 'bathroom', default: 1 })
+  bathroom: number;
+
   @Column('int', { nullable: true })
   age_of_construction: number;
 
@@ -98,4 +111,19 @@ export class Property {
   @ManyToOne(() => User, (user) => user.userId)
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'userId' }])
   user: User;
+
+  @CreateDateColumn({
+    type: 'timestamptz',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamptz',
+    name: 'updated_at',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updatedAt: Date;
 }

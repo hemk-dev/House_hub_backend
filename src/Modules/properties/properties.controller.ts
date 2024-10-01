@@ -8,7 +8,9 @@ import {
   Put,
   Query,
   Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PropertiesService } from './properties.service';
 import { Property } from 'src/shared/entities/Property.entity';
@@ -20,6 +22,9 @@ import { UpdatePropertyDto } from './dto/updateProperty.dto';
 import { AuthGuard } from '../user/guards/auth.guard';
 import { RolesGuard } from '../user/guards/roles.guard';
 import { ListPropertiesDto } from './dto/ListProperties.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('properties')
 export class PropertiesController {
@@ -34,32 +39,56 @@ export class PropertiesController {
     return this.propertiesService.listProperties(listPropertiesFilters);
   }
 
-  //for website property details page
+  @Get('list')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BUYER, UserRole.OWNER)
+  @Roles(UserRole.ADMIN, UserRole.OWNER)
+  async getPropertyDashboard(@Request() request: any): Promise<any> {
+    return this.propertiesService.getPropertyDashboard(request.user);
+  }
+
+  @Get('filters')
+  async getPropertiesFilters(): Promise<any> {
+    return this.propertiesService.getFilters();
+  }
+
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.BUYER, UserRole.OWNER)
+  @UseGuards(AuthGuard, RolesGuard)
   async getPropertyById(@Param('id') id: string): Promise<Property> {
-    return this.propertiesService.getPropertyById(id);
+    return await this.propertiesService.getPropertyById(id);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.OWNER)
-  @Get('owner')
-  async getPropertyByOwner(@Request() request: any): Promise<Property[]> {
-    return this.propertiesService.getPropertyByOwner(request.user);
-  }
-
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.OWNER)
   @Post('register')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.OWNER)
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads', // Define your upload directory
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only image files are allowed!'), false);
+        }
+      },
+    }),
+  )
   async createProperty(
     @Body() registerPropertyDto: RegisterPropertyDto,
+    @UploadedFile() image: Express.Multer.File,
     @Request() request: any,
   ): Promise<RegisterPropertyInterface> {
-    console.log('Register', request.user);
     return this.propertiesService.registerProperty(
       registerPropertyDto,
       request.user,
+      image?.filename,
     );
   }
 
