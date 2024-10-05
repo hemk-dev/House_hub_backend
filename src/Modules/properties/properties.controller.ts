@@ -8,7 +8,7 @@ import {
   Put,
   Query,
   Request,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,19 +16,21 @@ import { PropertiesService } from './properties.service';
 import { Property } from 'src/shared/entities/Property.entity';
 import { UserRole } from 'src/shared/enums/user-roles.enum';
 import { Roles } from '../user/decorators/roles.decorator';
-import { RegisterPropertyDto } from './dto/registerProperty.dto';
-import { RegisterPropertyInterface } from 'src/shared/interfaces/registerProperty.interface';
 import { UpdatePropertyDto } from './dto/updateProperty.dto';
 import { AuthGuard } from '../user/guards/auth.guard';
 import { RolesGuard } from '../user/guards/roles.guard';
 import { ListPropertiesDto } from './dto/ListProperties.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { RegisterPropertyDto } from './dto/registerProperty.dto';
+import { CloudinaryService } from 'src/shared/utils/cloudinary.utility';
+import { uploadImageToCloudinary } from 'src/shared/cloudinary/cloudinary';
 
 @Controller('properties')
 export class PropertiesController {
-  constructor(private propertiesService: PropertiesService) {}
+  constructor(
+    private propertiesService: PropertiesService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   // @UseGuards(AuthGuard, RolesGuard)
   // @Roles(UserRole.ADMIN, UserRole.BUYER, UserRole.OWNER)
@@ -69,34 +71,23 @@ export class PropertiesController {
   @Post('register')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.OWNER)
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads', // Define your upload directory
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          cb(null, true);
-        } else {
-          cb(new Error('Only image files are allowed!'), false);
-        }
-      },
-    }),
-  )
+  @UseInterceptors(FilesInterceptor('photos', 5))
   async createProperty(
     @Body() registerPropertyDto: RegisterPropertyDto,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFiles() photos: Express.Multer.File[],
     @Request() request: any,
-  ): Promise<RegisterPropertyInterface> {
+  ): Promise<any> {
+    const uploadPromises = photos.map((file) =>
+      uploadImageToCloudinary(file, { folder: 'property_images' }),
+    );
+    const uploadResults = await Promise.all(uploadPromises);
+    console.log('🚀 ~ PropertiesController ~ uploadResults:', uploadResults);
+    const photoUrls = uploadResults.map((result) => result.secure_url); // Use secure_url for rendering
+
     return this.propertiesService.registerProperty(
       registerPropertyDto,
       request.user,
-      image?.filename,
+      photoUrls, // Pass Cloudinary URLs instead of filenames
     );
   }
 

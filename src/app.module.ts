@@ -8,6 +8,7 @@ import { typeormConfig } from './db/typrormConfig';
 import { PropertiesModule } from './Modules/properties/properties.module';
 import { JwtModule } from '@nestjs/jwt';
 import { InquiryModule } from './Modules/inquiry/inquiry.module';
+import { AdminModule } from './Modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { InquiryModule } from './Modules/inquiry/inquiry.module';
     TypeOrmModule.forRootAsync(typeormConfig),
     UserModule,
     PropertiesModule,
+    AdminModule,
     InquiryModule,
     JwtModule.register({
       global: true,

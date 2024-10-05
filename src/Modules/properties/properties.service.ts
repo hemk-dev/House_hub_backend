@@ -184,7 +184,7 @@ export class PropertiesService {
   async registerProperty(
     registerPropertyDto: RegisterPropertyDto,
     user: any,
-    imageFilename: string, // Accept the image filename as a parameter
+    imageFilenames: string[], // Accept array of image filenames
   ): Promise<RegisterPropertyInterface> {
     try {
       const encryptedEmail = await this.cryptoUtility.encode(user.email);
@@ -193,7 +193,7 @@ export class PropertiesService {
         userId: user.userId,
         email: encryptedEmail,
         owner_name: `${user.fname} ${user.lname}`,
-        photos: imageFilename ? [imageFilename] : [], // Add the image filename to the 'photos' field
+        photos: imageFilenames, // Store array of image filenames in 'photos'
       });
       await this.propertyRepository.save(property);
       return {

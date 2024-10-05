@@ -1,12 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsArray,
-  IsDecimal,
-  IsInt,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray } from 'class-validator';
 
 export class RegisterPropertyDto {
   @IsString()
@@ -17,14 +9,13 @@ export class RegisterPropertyDto {
   @IsNotEmpty()
   type: string;
 
-  @IsInt()
+  // @IsInt()
+  @IsNotEmpty()
   availability_status: number;
 
-  @IsDecimal()
   @IsNotEmpty()
   security_deposit: number;
 
-  @IsDecimal()
   @IsNotEmpty()
   rent: number;
 
@@ -52,16 +43,13 @@ export class RegisterPropertyDto {
   @IsNotEmpty()
   zipcode: string;
 
-  @IsDecimal()
   @IsOptional()
   carpet_area?: number;
 
   @IsNotEmpty()
-  @IsInt()
   status: number;
 
   @IsNotEmpty()
-  @IsInt()
   furnishing: number;
 
   @IsArray()
@@ -69,10 +57,8 @@ export class RegisterPropertyDto {
   photos?: string[];
 
   @IsNotEmpty()
-  @IsInt()
   BHK: number;
 
-  @IsNumber()
   @IsOptional()
   age_of_construction?: number;
 
