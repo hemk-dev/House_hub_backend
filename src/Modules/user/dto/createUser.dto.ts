@@ -3,11 +3,9 @@ import {
   IsEmail,
   IsNotEmpty,
   MinLength,
-  IsEnum,
   IsNumber,
   Matches,
 } from 'class-validator';
-import { UserRole } from 'src/shared/enums/user-roles.enum';
 
 export class CreateUserDto {
   @IsString()
@@ -22,9 +20,8 @@ export class CreateUserDto {
   @IsNotEmpty()
   email: string;
 
-  @IsEnum(UserRole)
   @IsNumber()
-  role_id: UserRole;
+  role_id: number;
 
   @IsString()
   @MinLength(8)

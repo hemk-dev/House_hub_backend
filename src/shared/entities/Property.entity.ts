@@ -4,6 +4,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,6 +14,7 @@ import { FurnishingStatus } from '../enums/furnishing-status.enum';
 import { BHKStatus } from '../enums/bhk-type.enum';
 import { User } from './User.entity';
 import { tenantPreferred } from '../enums/tenant-preferred.enum';
+import { Inquiry } from './Inquiry.entity';
 
 @Entity('properties')
 export class Property {
@@ -126,4 +128,7 @@ export class Property {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
+
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.property) // Create a one-to-many relationship
+  inquiries: Inquiry[];
 }

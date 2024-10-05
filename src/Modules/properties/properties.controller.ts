@@ -46,6 +46,14 @@ export class PropertiesController {
     return this.propertiesService.getPropertyDashboard(request.user);
   }
 
+  @Get('owner/:userID')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.OWNER)
+  async getPropertyByOwner(@Param('userID') userID: string): Promise<any> {
+    console.log('getPropertyByOwner', userID);
+    return this.propertiesService.getPropertyByOwner(userID);
+  }
+
   @Get('filters')
   async getPropertiesFilters(): Promise<any> {
     return this.propertiesService.getFilters();

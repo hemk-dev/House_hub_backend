@@ -4,7 +4,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Property } from './Property.entity';
 
 @Entity('inquiry')
 export class Inquiry {
@@ -34,4 +37,8 @@ export class Inquiry {
 
   @UpdateDateColumn({ name: 'updated_date' })
   updated_date: Date;
+
+  @ManyToOne(() => Property, (property) => property.inquiries)
+  @JoinColumn({ name: 'property_id', referencedColumnName: 'id' }) // This assumes `id` is the primary key in Property
+  property: Property; // You can access the related property via this field
 }

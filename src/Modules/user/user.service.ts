@@ -138,6 +138,7 @@ export class UserService {
         throw new NotFoundException('User Not Found');
       }
       user.otp = otp;
+      user.otpUsed = false;
       await this.userRepository.save(user);
 
       const subject = 'Reset Password OTP';
@@ -179,6 +180,18 @@ export class UserService {
       return {
         message: 'OTP verified Successfully',
       };
+    } catch (error) {
+      ErrorResponseUtility.handleApiResponseError(error);
+    }
+  }
+
+  async deleteUser(id: string): Promise<any> {
+    try {
+      const deleteUser = await this.userRepository.delete(id);
+      if (deleteUser.affected === 0) {
+        throw new NotFoundException('User not found');
+      }
+      return { message: 'User deleted successfully' };
     } catch (error) {
       ErrorResponseUtility.handleApiResponseError(error);
     }

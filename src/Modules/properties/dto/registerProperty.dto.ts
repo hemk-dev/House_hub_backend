@@ -1,16 +1,12 @@
 import {
   IsString,
   IsNotEmpty,
-  IsEnum,
   IsNumber,
   IsOptional,
   IsArray,
   IsDecimal,
+  IsInt,
 } from 'class-validator';
-import { BHKStatus } from 'src/shared/enums/bhk-type.enum';
-import { FurnishingStatus } from 'src/shared/enums/furnishing-status.enum';
-import { AvailabilityStatus } from 'src/shared/enums/property-availability-status.enum';
-import { PropertyStatus } from 'src/shared/enums/property-status.enum';
 
 export class RegisterPropertyDto {
   @IsString()
@@ -21,8 +17,8 @@ export class RegisterPropertyDto {
   @IsNotEmpty()
   type: string;
 
-  @IsEnum(AvailabilityStatus)
-  availability_status: AvailabilityStatus;
+  @IsInt()
+  availability_status: number;
 
   @IsDecimal()
   @IsNotEmpty()
@@ -60,21 +56,21 @@ export class RegisterPropertyDto {
   @IsOptional()
   carpet_area?: number;
 
-  @IsEnum(PropertyStatus)
   @IsNotEmpty()
-  status: PropertyStatus;
+  @IsInt()
+  status: number;
 
-  @IsEnum(FurnishingStatus)
   @IsNotEmpty()
-  furnishing: FurnishingStatus;
+  @IsInt()
+  furnishing: number;
 
   @IsArray()
   @IsOptional()
   photos?: string[];
 
-  @IsEnum(BHKStatus)
   @IsNotEmpty()
-  BHK: BHKStatus;
+  @IsInt()
+  BHK: number;
 
   @IsNumber()
   @IsOptional()

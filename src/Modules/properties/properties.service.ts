@@ -126,15 +126,15 @@ export class PropertiesService {
         });
       }
 
-      if (listPropertiesFilter?.minSecurityDeposit) {
+      if (listPropertiesFilter?.minDeposit) {
         query.andWhere('property.security_deposit >= :minSecurityDeposit', {
-          minSecurityDeposit: listPropertiesFilter?.minSecurityDeposit,
+          minSecurityDeposit: listPropertiesFilter?.minDeposit,
         });
       }
 
-      if (listPropertiesFilter?.maxSecurityDeposit) {
+      if (listPropertiesFilter?.maxDeposit) {
         query.andWhere('property.security_deposit <= :maxSecurityDeposit', {
-          maxSecurityDeposit: listPropertiesFilter?.maxSecurityDeposit,
+          maxSecurityDeposit: listPropertiesFilter?.maxDeposit,
         });
       }
 
@@ -172,6 +172,9 @@ export class PropertiesService {
       const property = await this.propertyRepository.findOne({
         where: { id },
       });
+      if (!property) {
+        throw new NotFoundException('Property not found!');
+      }
       return property;
     } catch (error) {
       ErrorResponseUtility.handleApiResponseError(error);
@@ -198,14 +201,23 @@ export class PropertiesService {
         message: 'Property Registered successfully',
       };
     } catch (error) {
-      console.log('error', error);
       ErrorResponseUtility.handleApiResponseError(error);
     }
   }
 
-  async getPropertyByOwner(): Promise<any> {
+  async getPropertyByOwner(userID: string): Promise<any> {
     try {
-    } catch (error) {}
+      const properties = await this.propertyRepository.find({
+        where: { userId: userID },
+      });
+      if (properties.length === 0) {
+        throw new NotFoundException('Property Not found');
+      }
+      console.log('11111111', properties);
+      return properties;
+    } catch (error) {
+      ErrorResponseUtility.handleApiResponseError(error);
+    }
   }
 
   async getPropertyDashboard(user: User): Promise<Property[]> {
@@ -258,24 +270,28 @@ export class PropertiesService {
         throw new NotFoundException('Property Not Found');
       }
 
+      // Update only fields that are provided in updatePropertyDto
       const updatedProperty = {
         ...property,
-        ...(updatePropertyDto.availability_status && {
+        ...(updatePropertyDto.availability_status !== undefined && {
           availability_status: updatePropertyDto.availability_status,
         }),
-        ...(updatePropertyDto.security_deposit && {
+        ...(updatePropertyDto.security_deposit !== undefined && {
           security_deposit: updatePropertyDto.security_deposit,
         }),
-        ...(updatePropertyDto.rent && { rent: updatePropertyDto.rent }),
-        ...(updatePropertyDto.contact && {
+        ...(updatePropertyDto.rent !== undefined && {
+          rent: updatePropertyDto.rent,
+        }),
+        ...(updatePropertyDto.contact !== undefined && {
           contact: updatePropertyDto.contact,
         }),
-        ...(updatePropertyDto.status && { status: updatePropertyDto.status }),
-        ...(updatePropertyDto.furnishing && {
+        ...(updatePropertyDto.status !== undefined && {
+          status: updatePropertyDto.status,
+        }),
+        ...(updatePropertyDto.furnishing !== undefined && {
           furnishing: updatePropertyDto.furnishing,
         }),
-        ...(updatePropertyDto.photos && { photos: updatePropertyDto.photos }),
-        ...(updatePropertyDto.age_of_construction && {
+        ...(updatePropertyDto.age_of_construction !== undefined && {
           age_of_construction: updatePropertyDto.age_of_construction,
         }),
         ...(updatePropertyDto.description && {
@@ -283,9 +299,9 @@ export class PropertiesService {
         }),
       };
 
+      console.log(updatedProperty);
       await this.propertyRepository.save(updatedProperty);
-
-      return { message: 'Property Deleted Successfully' };
+      return { message: 'Property Updated Successfully' };
     } catch (error) {
       ErrorResponseUtility.handleApiResponseError(error);
     }

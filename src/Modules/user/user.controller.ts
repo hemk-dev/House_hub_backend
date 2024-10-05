@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserResponse } from 'src/shared/interfaces/createUser.interface';
@@ -14,14 +25,6 @@ import { Roles } from './decorators/roles.decorator';
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
-
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(UserRole.ADMIN, UserRole.OWNER)
-  // @Get('status')
-  // status(@Request() request) {
-  //   console.log('Inside AuthController status method', request.user);
-  //   return 'req.user';
-  // }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -40,6 +43,11 @@ export class UserController {
   @Post('login')
   async login(@Body() loginUserDto: loginUserDto): Promise<CreateUserResponse> {
     return this.userService.loginUser(loginUserDto);
+  }
+
+  @Post('logout')
+  async logout(@Req() req, @Res() res) {
+    return res.status(200).json({ message: 'Successfully logged out' });
   }
 
   @Post('forget-password')
@@ -61,5 +69,12 @@ export class UserController {
     @Body() resetPasswordDto: loginUserDto,
   ): Promise<{ message: string }> {
     return this.userService.updatePassword(resetPasswordDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
+    return this.userService.deleteUser(id);
   }
 }

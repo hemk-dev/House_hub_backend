@@ -1,43 +1,29 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsArray,
-  IsDecimal,
-} from 'class-validator';
-import { FurnishingStatus } from 'src/shared/enums/furnishing-status.enum';
-import { AvailabilityStatus } from 'src/shared/enums/property-availability-status.enum';
-import { PropertyStatus } from 'src/shared/enums/property-status.enum';
+import { IsString, IsNumber, IsOptional, IsInt } from 'class-validator';
 
 export class UpdatePropertyDto {
-  @IsEnum(AvailabilityStatus)
-  availability_status: AvailabilityStatus;
+  @IsInt()
+  @IsOptional()
+  availability_status?: number;
 
-  @IsDecimal()
-  @IsNotEmpty()
-  security_deposit: number;
+  @IsNumber()
+  @IsOptional()
+  security_deposit?: number;
 
-  @IsDecimal()
-  @IsNotEmpty()
-  rent: number;
+  @IsNumber()
+  @IsOptional()
+  rent?: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   contact: string;
 
-  @IsEnum(PropertyStatus)
-  @IsNotEmpty()
-  status: PropertyStatus;
-
-  @IsEnum(FurnishingStatus)
-  @IsNotEmpty()
-  furnishing: FurnishingStatus;
-
-  @IsArray()
   @IsOptional()
-  photos?: string[];
+  @IsInt()
+  status: number;
+
+  @IsOptional()
+  @IsInt()
+  furnishing: number;
 
   @IsNumber()
   @IsOptional()

@@ -1,8 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { BHKStatus } from 'src/shared/enums/bhk-type.enum';
-import { FurnishingStatus } from 'src/shared/enums/furnishing-status.enum';
-import { AvailabilityStatus } from 'src/shared/enums/property-availability-status.enum';
-import { PropertyStatus } from 'src/shared/enums/property-status.enum';
+import { IsOptional, IsString } from 'class-validator';
 
 export class ListPropertiesDto {
   @IsOptional()
@@ -22,20 +18,16 @@ export class ListPropertiesDto {
   country?: string;
 
   @IsOptional()
-  @IsEnum(AvailabilityStatus)
-  availabilityStatus?: AvailabilityStatus;
+  availabilityStatus?: number;
 
   @IsOptional()
-  @IsEnum(PropertyStatus)
-  status?: PropertyStatus;
+  status?: number;
 
   @IsOptional()
-  @IsEnum(FurnishingStatus)
-  furnishing?: FurnishingStatus;
+  furnishing?: number;
 
   @IsOptional()
-  @IsEnum(BHKStatus)
-  BHK?: BHKStatus;
+  BHK?: number;
 
   @IsOptional()
   minRent?: number;
@@ -44,10 +36,10 @@ export class ListPropertiesDto {
   maxRent?: number;
 
   @IsOptional()
-  minSecurityDeposit?: number;
+  minDeposit?: number;
 
   @IsOptional()
-  maxSecurityDeposit?: number;
+  maxDeposit?: number;
 
   @IsOptional()
   minCarpetArea?: number;

@@ -23,12 +23,17 @@ export class InquiryService {
     private mailService: MailService,
   ) {}
 
-  async listInquiries(InquiryFilter: InquiriesListDto): Promise<Inquiry[]> {
+  async listInquiries(InquiryFilter: InquiriesListDto): Promise<any[]> {
     try {
-      const query = this.InquiryRepository.createQueryBuilder('inquiry');
+      const query = this.InquiryRepository.createQueryBuilder('inquiry')
+        .leftJoinAndSelect('inquiry.property', 'property') // Join the property
+        .select([
+          'inquiry', // Select all fields from inquiry
+          'property.name AS propertyName', // Select the property name
+        ]);
 
       if (InquiryFilter?.status) {
-        query.andWhere('property.availability_status = :availabilityStatus', {
+        query.andWhere('inquiry.status = :status', {
           status: InquiryFilter?.status,
         });
       }
@@ -45,13 +50,21 @@ export class InquiryService {
         });
       }
 
-      const Inquiries = await query.getMany();
+      const inquiries = await query.getRawMany(); // Use getRawMany to access selected fields directly
 
-      Inquiries.map(async (i) => {
-        i.email = await this.cryptoUtility.decode(i.email);
-        i.contact = await this.cryptoUtility.decode(i.contact);
-      });
-      return Inquiries;
+      // Decode sensitive information
+      const decodedInquiries = await Promise.all(
+        inquiries.map(async (inquiry) => {
+          const decodedInquiry = {
+            ...inquiry,
+            email: await this.cryptoUtility.decode(inquiry.email),
+            contact: await this.cryptoUtility.decode(inquiry.contact),
+          };
+          return decodedInquiry;
+        }),
+      );
+
+      return decodedInquiries;
     } catch (error) {
       ErrorResponseUtility.handleApiResponseError(error);
     }

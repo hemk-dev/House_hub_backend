@@ -1,6 +1,5 @@
-import { IsOptional, IsString, IsEnum, IsDate, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsDate, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
-import { InquiryStatus } from 'src/shared/enums/inquiry-status.enum';
 
 export class InquiriesListDto {
   @IsOptional()
@@ -12,8 +11,7 @@ export class InquiriesListDto {
   email?: string;
 
   @IsOptional()
-  @IsEnum(InquiryStatus)
-  status?: InquiryStatus;
+  status?: number;
 
   @IsOptional()
   @IsDate()
