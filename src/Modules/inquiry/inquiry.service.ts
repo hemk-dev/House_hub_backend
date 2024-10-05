@@ -57,8 +57,12 @@ export class InquiryService {
         inquiries.map(async (inquiry) => {
           const decodedInquiry = {
             ...inquiry,
-            email: await this.cryptoUtility.decode(inquiry.email),
-            contact: await this.cryptoUtility.decode(inquiry.contact),
+            inquiry_email: await this.cryptoUtility.decode(
+              inquiry.inquiry_email,
+            ),
+            inquiry_contact: await this.cryptoUtility.decode(
+              inquiry.inquiry_contact,
+            ),
           };
           return decodedInquiry;
         }),
