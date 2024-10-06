@@ -6,9 +6,10 @@ import { Property } from 'src/shared/entities/Property.entity';
 import { CryptoUtility } from 'src/shared/utils/crypto.utility';
 import { UserModule } from '../user/user.module';
 import { CloudinaryService } from 'src/shared/utils/cloudinary.utility';
+import { Transasctions } from 'src/shared/entities/Transasctions.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Property]), UserModule],
+  imports: [TypeOrmModule.forFeature([Property, Transasctions]), UserModule],
   controllers: [PropertiesController],
   providers: [PropertiesService, CryptoUtility, CloudinaryService],
 })

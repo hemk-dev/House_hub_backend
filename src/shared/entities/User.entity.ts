@@ -4,10 +4,8 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
 } from 'typeorm';
 import { UserRole } from '../enums/user-roles.enum';
-import { Property } from './Property.entity';
 
 @Entity('user')
 export class User {
@@ -60,7 +58,4 @@ export class User {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
-
-  @OneToMany(() => Property, (property) => property.user)
-  property: Property[];
 }

@@ -22,15 +22,11 @@ import { RolesGuard } from '../user/guards/roles.guard';
 import { ListPropertiesDto } from './dto/ListProperties.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { RegisterPropertyDto } from './dto/registerProperty.dto';
-import { CloudinaryService } from 'src/shared/utils/cloudinary.utility';
 import { uploadImageToCloudinary } from 'src/shared/cloudinary/cloudinary';
 
 @Controller('properties')
 export class PropertiesController {
-  constructor(
-    private propertiesService: PropertiesService,
-    private cloudinaryService: CloudinaryService,
-  ) {}
+  constructor(private propertiesService: PropertiesService) {}
 
   // @UseGuards(AuthGuard, RolesGuard)
   // @Roles(UserRole.ADMIN, UserRole.BUYER, UserRole.OWNER)
@@ -59,6 +55,13 @@ export class PropertiesController {
   @Get('filters')
   async getPropertiesFilters(): Promise<any> {
     return this.propertiesService.getFilters();
+  }
+
+  @Get('transactions')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getPaymentTransactions(): Promise<any> {
+    return this.propertiesService.getAllTransactions();
   }
 
   @Get(':id')
@@ -93,11 +96,14 @@ export class PropertiesController {
   @Roles(UserRole.BUYER)
   @Post('book')
   async bookProperty(
-    @Body() body: { propertyId: string }, // Expect paymentToken from the request body
+    @Body() body: { propertyId: string },
+    @Request() request: any,
   ): Promise<any> {
-    const result = await this.propertiesService.bookProperty(body.propertyId);
-
-    return result; // Return the response from the service
+    const result = await this.propertiesService.bookProperty(
+      body.propertyId,
+      request.user,
+    );
+    return result;
   }
 
   @UseGuards(AuthGuard, RolesGuard)

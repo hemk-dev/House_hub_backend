@@ -47,6 +47,9 @@ export class Property {
   owner_name: string;
 
   @Column()
+  Buyer_name: string;
+
+  @Column()
   contact: string;
 
   @Column()

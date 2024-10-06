@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Property } from 'src/shared/entities/Property.entity';
 import { ErrorResponseUtility } from 'src/shared/utils/error-response.utility';
@@ -15,21 +11,26 @@ import { UpdatePropertyDto } from './dto/updateProperty.dto';
 import { ListPropertiesDto } from './dto/ListProperties.dto';
 import { UserRole } from 'src/shared/enums/user-roles.enum';
 import Stripe from 'stripe';
+import { PropertyStatus } from 'src/shared/enums/property-status.enum';
+import { Transasctions } from 'src/shared/entities/Transasctions.entity';
 
 @Injectable()
 export class PropertiesService {
   constructor(
     @InjectRepository(Property)
     private propertyRepository: Repository<Property>,
+    @InjectRepository(Transasctions)
+    private paymentsRepository: Repository<Transasctions>,
     private cryptoUtility: CryptoUtility,
   ) {}
 
   stripe = new Stripe(process.env.STRIPE_SECRET!, {
     apiVersion: '2022-11-15' as Stripe.LatestApiVersion,
   });
-  async bookProperty(propertyId: string): Promise<any> {
+
+  async bookProperty(propertyId: string, user: any): Promise<any> {
     try {
-      // Fetch the property by ID
+      const { fname, lname } = user;
       const property: any = await this.propertyRepository.findOne({
         where: { id: propertyId },
       });
@@ -40,39 +41,56 @@ export class PropertiesService {
 
       const deposit = parseFloat(property.security_deposit);
       const rent = parseFloat(property.rent);
-      const totalAmount = (deposit + rent) * 100; // Total amount in cents
+      const totalAmount = (deposit + rent) * 100;
 
       const lineItems = [
         {
           price_data: {
-            currency: 'inr', // Set the currency
+            currency: 'inr',
             product_data: {
-              name: `Booking for Property: ${property.name}`, // Product name or description
-              description: 'Rent and Security Deposit', // Optional product description
+              name: `Booking for Property: ${property.name}`,
+              description: 'Rent and Security Deposit',
             },
-            unit_amount: totalAmount, // Total amount in cents
+            unit_amount: totalAmount,
           },
-          quantity: 1, // Number of items (usually 1 for bookings)
+          quantity: 1,
         },
       ];
 
-      // Create a Checkout Session with Stripe
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment',
-        line_items: lineItems, // Pass the line items here
+        line_items: lineItems,
         success_url: 'http://localhost:3000/success',
         cancel_url: 'http://localhost:3000/cancel',
       });
+
+      const transaction = new Transasctions();
+      transaction.property_id = property.id;
+      transaction.amount = totalAmount;
+      transaction.paymentIntentId = session.id;
+      transaction.owner_name = property.owner_name;
+      transaction.buyer_name = `${fname} ${lname}`;
+      property.status = PropertyStatus.OCCUPIED;
+
+      await this.paymentsRepository.save(transaction);
+
       return {
         success: true,
         sessionId: session.id,
       };
     } catch (error) {
       console.error('Error while booking property:', error);
-      throw new InternalServerErrorException(
-        'An error occurred while processing the payment.',
-      );
+      return { success: false };
+    }
+  }
+
+  async getAllTransactions(): Promise<any> {
+    try {
+      const transactions = await this.paymentsRepository.find();
+      return transactions;
+    } catch (error) {
+      ErrorResponseUtility.handleApiResponseError(error);
     }
   }
 
