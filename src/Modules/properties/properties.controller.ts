@@ -81,7 +81,6 @@ export class PropertiesController {
       uploadImageToCloudinary(file, { folder: 'property_images' }),
     );
     const uploadResults = await Promise.all(uploadPromises);
-    console.log('🚀 ~ PropertiesController ~ uploadResults:', uploadResults);
     const photoUrls = uploadResults.map((result) => result.secure_url); // Use secure_url for rendering
 
     return this.propertiesService.registerProperty(
@@ -89,6 +88,16 @@ export class PropertiesController {
       request.user,
       photoUrls, // Pass Cloudinary URLs instead of filenames
     );
+  }
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.BUYER)
+  @Post('book')
+  async bookProperty(
+    @Body() body: { propertyId: string }, // Expect paymentToken from the request body
+  ): Promise<any> {
+    const result = await this.propertiesService.bookProperty(body.propertyId);
+
+    return result; // Return the response from the service
   }
 
   @UseGuards(AuthGuard, RolesGuard)

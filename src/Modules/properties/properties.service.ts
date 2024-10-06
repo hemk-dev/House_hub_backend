@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Property } from 'src/shared/entities/Property.entity';
 import { ErrorResponseUtility } from 'src/shared/utils/error-response.utility';
@@ -10,6 +14,7 @@ import { User } from 'src/shared/entities/User.entity';
 import { UpdatePropertyDto } from './dto/updateProperty.dto';
 import { ListPropertiesDto } from './dto/ListProperties.dto';
 import { UserRole } from 'src/shared/enums/user-roles.enum';
+import Stripe from 'stripe';
 
 @Injectable()
 export class PropertiesService {
@@ -18,6 +23,58 @@ export class PropertiesService {
     private propertyRepository: Repository<Property>,
     private cryptoUtility: CryptoUtility,
   ) {}
+
+  stripe = new Stripe(process.env.STRIPE_SECRET!, {
+    apiVersion: '2022-11-15' as Stripe.LatestApiVersion,
+  });
+  async bookProperty(propertyId: string): Promise<any> {
+    try {
+      // Fetch the property by ID
+      const property: any = await this.propertyRepository.findOne({
+        where: { id: propertyId },
+      });
+
+      if (!property) {
+        throw new NotFoundException('Property not found!');
+      }
+
+      const deposit = parseFloat(property.security_deposit);
+      const rent = parseFloat(property.rent);
+      const totalAmount = (deposit + rent) * 100; // Total amount in cents
+
+      const lineItems = [
+        {
+          price_data: {
+            currency: 'inr', // Set the currency
+            product_data: {
+              name: `Booking for Property: ${property.name}`, // Product name or description
+              description: 'Rent and Security Deposit', // Optional product description
+            },
+            unit_amount: totalAmount, // Total amount in cents
+          },
+          quantity: 1, // Number of items (usually 1 for bookings)
+        },
+      ];
+
+      // Create a Checkout Session with Stripe
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        line_items: lineItems, // Pass the line items here
+        success_url: 'http://localhost:3000/success',
+        cancel_url: 'http://localhost:3000/cancel',
+      });
+      return {
+        success: true,
+        sessionId: session.id,
+      };
+    } catch (error) {
+      console.error('Error while booking property:', error);
+      throw new InternalServerErrorException(
+        'An error occurred while processing the payment.',
+      );
+    }
+  }
 
   async getFilters(): Promise<any> {
     try {

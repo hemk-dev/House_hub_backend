@@ -12,22 +12,6 @@ export const uploadImageToCloudinary = async (
   options?: CloudinaryUploadOptions,
 ): Promise<UploadApiResponse> => {
   try {
-    // If file.buffer is present, use that to upload to Cloudinary
-    await cloudinary.uploader.upload_stream(
-      {
-        folder: options?.folder || 'default_folder',
-        public_id: options?.public_id || `${Date.now()}-${file.originalname}`,
-        format: options?.format || 'jpeg',
-      },
-      (error, result) => {
-        if (error) {
-          console.error('Error uploading to Cloudinary:', error);
-          throw new Error(`Error uploading to Cloudinary: ${error.message}`);
-        }
-        return result; // return the result
-      },
-    );
-
     // You must use a promise to resolve the stream
     const uploadPromise = new Promise<UploadApiResponse>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
@@ -35,6 +19,7 @@ export const uploadImageToCloudinary = async (
           folder: options?.folder || 'default_folder',
           public_id: options?.public_id || `${Date.now()}-${file.originalname}`,
           format: options?.format || 'jpeg',
+          timeout: 60000,
         },
         (error, result) => {
           if (error) {
@@ -51,6 +36,5 @@ export const uploadImageToCloudinary = async (
     return uploadResult; // Return the result
   } catch (error) {
     console.error('Error in uploadImageToCloudinary:', error);
-    throw new Error(`Error uploading to Cloudinary: ${error.message}`);
   }
 };
