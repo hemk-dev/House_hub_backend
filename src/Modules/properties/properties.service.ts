@@ -238,8 +238,11 @@ export class PropertiesService {
           listPropertiesFilter?.sortOrder || 'ASC',
         );
       }
-
       const properties = await query.getMany();
+
+      for (const property of properties) {
+        property.email = await this.cryptoUtility.decode(property.email);
+      }
       if (properties.length === 0) {
         throw new NotFoundException('No properties found!');
       }

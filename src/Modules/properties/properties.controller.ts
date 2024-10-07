@@ -58,8 +58,6 @@ export class PropertiesController {
   }
 
   @Get('transactions')
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(UserRole.ADMIN)
   async getPaymentTransactions(): Promise<any> {
     return this.propertiesService.getAllTransactions();
   }
@@ -80,7 +78,7 @@ export class PropertiesController {
     @UploadedFiles() photos: Express.Multer.File[],
     @Request() request: any,
   ): Promise<any> {
-    const uploadPromises = photos.map((file) =>
+    const uploadPromises = photos?.map((file) =>
       uploadImageToCloudinary(file, { folder: 'property_images' }),
     );
     const uploadResults = await Promise.all(uploadPromises);
