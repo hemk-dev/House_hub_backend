@@ -46,7 +46,7 @@ export class Property {
   @Column()
   owner_name: string;
 
-  @Column()
+  @Column('text', { nullable: true })
   Buyer_name: string;
 
   @Column()

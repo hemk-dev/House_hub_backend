@@ -14,6 +14,9 @@ export class Transasctions {
   @Column()
   property_id: string;
 
+  @Column({ type: 'text', nullable: true })
+  property_name: string;
+
   @Column()
   buyer_name: string;
 

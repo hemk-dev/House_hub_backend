@@ -58,8 +58,8 @@ export class PropertiesController {
   }
 
   @Get('transactions')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles(UserRole.ADMIN)
   async getPaymentTransactions(): Promise<any> {
     return this.propertiesService.getAllTransactions();
   }

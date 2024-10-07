@@ -61,17 +61,25 @@ export class PropertiesService {
         payment_method_types: ['card'],
         mode: 'payment',
         line_items: lineItems,
-        success_url: 'http://localhost:3000/success',
-        cancel_url: 'http://localhost:3000/cancel',
+        success_url: `${process.env.CLIENT_URL}/payment-success?amt=${totalAmount}&propertyId=${propertyId}`,
+        cancel_url: `${process.env.CLIENT_URL}/payment-failed?amt=${totalAmount}&propertyId=${propertyId}`,
       });
 
       const transaction = new Transasctions();
+      if (!session) {
+        transaction.status = false;
+        property.status = PropertyStatus.VACANT;
+      }
       transaction.property_id = property.id;
       transaction.amount = totalAmount;
       transaction.paymentIntentId = session.id;
+      transaction.property_name = property.name;
       transaction.owner_name = property.owner_name;
       transaction.buyer_name = `${fname} ${lname}`;
+      transaction.status = true;
       property.status = PropertyStatus.OCCUPIED;
+
+      await this.propertyRepository.save(property);
 
       await this.paymentsRepository.save(transaction);
 
@@ -97,7 +105,6 @@ export class PropertiesService {
   async getFilters(): Promise<any> {
     try {
       const query = this.propertyRepository.createQueryBuilder('property');
-
       const ownerName = await query
         .distinct(true)
         .select('property.owner_name')
