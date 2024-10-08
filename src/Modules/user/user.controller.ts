@@ -27,7 +27,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.OWNER)
   @Get()
   async getUsers(): Promise<listUserResponse> {
     return this.userService.findAll();
@@ -73,7 +73,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.OWNER)
   async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
     return this.userService.deleteUser(id);
   }
