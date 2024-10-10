@@ -93,9 +93,19 @@ export class PropertiesService {
     }
   }
 
-  async getAllTransactions(): Promise<any> {
+  async getAllTransactions(user: any): Promise<any> {
     try {
-      const transactions = await this.paymentsRepository.find();
+      const { fname, lname } = user;
+      let transactions: any;
+      if (user.roleId === 3) {
+        transactions = await this.paymentsRepository.find({
+          where: {
+            buyer_name: `${fname} ${lname}`,
+          },
+        });
+      } else {
+        transactions = await this.paymentsRepository.find();
+      }
       return transactions;
     } catch (error) {
       ErrorResponseUtility.handleApiResponseError(error);

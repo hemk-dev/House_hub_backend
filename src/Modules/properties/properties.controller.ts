@@ -58,8 +58,10 @@ export class PropertiesController {
   }
 
   @Get('transactions')
-  async getPaymentTransactions(): Promise<any> {
-    return this.propertiesService.getAllTransactions();
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.OWNER, UserRole.BUYER)
+  async getPaymentTransactions(@Request() request: any): Promise<any> {
+    return this.propertiesService.getAllTransactions(request.user);
   }
 
   @Get(':id')
